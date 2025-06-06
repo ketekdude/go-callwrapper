@@ -1,4 +1,4 @@
-module go-callwrapper
+module github.com/ketekdude/go-callwrapper
 
 go 1.22.8
 
