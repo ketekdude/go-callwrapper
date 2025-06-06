@@ -1,6 +1,6 @@
 module github.com/ketekdude/go-callwrapper
 
-go 1.22.8
+go 1.21
 
 require (
 	github.com/karlseguin/ccache v2.0.3+incompatible
