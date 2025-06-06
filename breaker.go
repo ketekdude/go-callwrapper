@@ -19,6 +19,15 @@ type breakerStruct struct {
 }
 
 func newBreaker(cfg CallwrapperConfig) BreakerInterface {
+	//default cb on state changes print to terminal
+	if cfg.OnCBStateChanges == nil {
+		cfg.OnCBStateChanges = func(name string, from, to gobreaker.State) {
+			fmt.Printf("CircuitBreaker %s state changes from %s to %s\n", name, from, to)
+		}
+	}
+	if cfg.CBInterval == 0 {
+		cfg.CBInterval = 1000
+	}
 	cb := gobreaker.NewCircuitBreaker(gobreaker.Settings{
 		Name:        fmt.Sprintf("%s-%s-cb", cfg.ServiceName, cfg.FuncName),
 		MaxRequests: 5,
