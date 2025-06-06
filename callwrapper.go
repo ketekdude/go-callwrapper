@@ -31,7 +31,7 @@ type CallwrapperConfig struct {
 }
 
 type InterfaceCallwrapper interface {
-	Call(ctx context.Context, f func(context.Context) (interface{}, error)) (interface{}, error)
+	Call(ctx context.Context, reqKey string, f func(context.Context) (interface{}, error)) (interface{}, error)
 	CheckBreaker()
 }
 
@@ -68,14 +68,14 @@ func NewWrapper(cfg CallwrapperConfig) InterfaceCallwrapper {
 	return &cw
 }
 
-func (c *Callwrapper) Call(ctx context.Context, fn func(ctx context.Context) (interface{}, error)) (interface{}, error) {
+func (c *Callwrapper) Call(ctx context.Context, reqKey string, fn func(ctx context.Context) (interface{}, error)) (interface{}, error) {
 	//set timeout
 	return c.circuitBreaker.Execute(func() (interface{}, error) {
-		return c.callWithTimeout(ctx, fn)
+		return c.callWithTimeout(ctx, reqKey, fn)
 	})
 }
 
-func (c *Callwrapper) callWithTimeout(ctx context.Context, fn func(ctx context.Context) (interface{}, error)) (interface{}, error) {
+func (c *Callwrapper) callWithTimeout(ctx context.Context, reqKey string, fn func(ctx context.Context) (interface{}, error)) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(ctx, c.config.timeoutDuration)
 	defer cancel()
 	start := time.Now()
@@ -87,7 +87,7 @@ func (c *Callwrapper) callWithTimeout(ctx context.Context, fn func(ctx context.C
 
 	if c.config.IsMemCache {
 		//get the data from memcache first
-		if data, ok := c.memcache.Get(ctx, c.name); ok {
+		if data, ok := c.memcache.Get(ctx, reqKey); ok {
 			//directly return on memcache able to find the data
 			return data, nil
 		}
