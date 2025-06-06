@@ -104,7 +104,7 @@ func (c *Callwrapper) callWithTimeout(ctx context.Context, reqKey string, fn fun
 	}()
 	select {
 	case <-ctx.Done():
-		err := fmt.Errorf("%s. TimeoutConfig: %d | Actual: %d", ctx.Err(), c.config.timeoutDuration, time.Since(start))
+		err := fmt.Errorf("%s. TimeoutConfig: %d | Actual: %d", ctx.Err(), c.config.timeoutDuration.Milliseconds(), time.Since(start).Milliseconds())
 		return nil, err
 	case data := <-done:
 		return data.result, data.err
